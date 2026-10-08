@@ -1,10 +1,19 @@
-<img src="GhueyPrompt/Resources/Assets.xcassets/AppIcon.appiconset/icon_32x32@2x.png" width="64" height="64" alt="Ghuey Prompt icon">
-
 # Ghuey Prompt
 
-A native macOS prompt library that lives on the left edge of your screen. Save text from any app, find it when you need it, and insert it where your cursor is. Use it with T3 Code, ChatGPT, Claude, or another app that accepts pasted text.
+<img src=".github/assets/readme-banner.png" width="1280" alt="Ghuey Prompt goose logo. Your prompts, one edge away. Save once. Insert anywhere.">
 
-Ghuey Prompt runs in the menu bar, with a SwiftUI shelf and AppKit windows. Your library stays in a readable JSON file on your Mac, with optional iCloud Drive sync.
+A native macOS prompt library at the left edge of your screen. Save text from any app, find it when you need it, and insert it where your cursor is. Use it with T3 Code, ChatGPT, Claude, or another app that accepts pasted text.
+
+**macOS 14+ · Apple Silicon and Intel · No account or API key** · [MIT licensed](LICENSE)
+
+[Get started](#build-and-install) · [Shortcuts](#shortcuts-and-controls) · [Templates](#use-reusable-templates) · [Storage and privacy](#storage-and-privacy) · [Contribute](#contribute)
+
+- **Save from anywhere.** Use a global shortcut, the Services menu, or drag text onto the screen edge.
+- **Insert without switching apps.** Click a prompt or use a favorite's hotkey.
+- **Make prompts reusable.** Fill template fields, attach your clipboard, or stack several prompts.
+- **Keep your library with you.** Readable local JSON, optional iCloud Drive sync, and on-device titles when available.
+
+Ghuey Prompt runs in the menu bar, with a SwiftUI shelf and AppKit windows.
 
 ## Build and install
 
@@ -127,4 +136,14 @@ The source is organized by responsibility:
 - `GhueyPrompt/UI/` contains the shelf, editor, preview, and template form.
 - `GhueyPromptTests/` tests library persistence, search, templates, merging, migration, and shelf behavior.
 
-The website and cinematic demo are maintained separately from this app repository.
+To regenerate the repository's header and social preview from the app icon, run `swift scripts/make-repo-art.swift`.
+
+## Contribute
+
+Use [GitHub Issues](https://github.com/JMHSV/ghuey-prompt/issues/new/choose) to report a bug or suggest a feature. For a bug, include your macOS version, the app you were using, and steps that reproduce the problem.
+
+For code changes, describe the problem and the resulting behavior in your pull request. Run `make test` and check the behavior in the real app before submitting. Keep changes focused on saving, finding, and using prompts.
+
+## License
+
+[MIT](LICENSE).

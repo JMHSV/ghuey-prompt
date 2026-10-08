@@ -74,7 +74,7 @@ struct PromptStoreTests {
         let prompt = try #require(store.prompts.first)
 
         try store.rename(id: prompt.id, to: "Meeting actions")
-        try store.applyGeneratedTitle("Summarize Meeting Notes", to: prompt.id, replacing: prompt.title)
+        #expect(try store.applyGeneratedTitle("Summarize Meeting Notes", to: prompt) == false)
         #expect(store.prompts.first?.title == "Meeting actions")
     }
 

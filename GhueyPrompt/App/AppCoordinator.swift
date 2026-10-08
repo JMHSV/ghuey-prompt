@@ -1,5 +1,4 @@
 import AppKit
-import OSLog
 
 /// Carries out the app's user-facing actions — inserting, copying and saving prompts —
 /// and connects the shelf to the screen edge, hotkeys, settings and the library file.
@@ -12,7 +11,6 @@ final class AppCoordinator {
     private let toasts = ToastPresenter()
     private var favoriteHotKeys: FavoriteHotKeys?
     private var watcher: FileWatcher?
-    private static let log = Logger(subsystem: "com.homesetv.GhueyPrompt", category: "app")
 
     init(store: PromptStore) {
         self.store = store
@@ -158,12 +156,10 @@ final class AppCoordinator {
     private func improveTitle(of prompt: Prompt) {
         guard prompt.title == PromptTitle.derive(from: prompt.body), TitleGenerator.isAvailable else { return }
         Task {
-            guard let title = await TitleGenerator.title(for: prompt.body) else { return }
-            do {
-                try store.applyGeneratedTitle(title, to: prompt.id, replacing: prompt.title)
-            } catch {
-                Self.log.error("Couldn't apply generated title: \(error.localizedDescription, privacy: .public)")
-            }
+            guard store.prompts.contains(where: {
+                $0.id == prompt.id && $0.title == prompt.title && $0.body == prompt.body
+            }) else { return }
+            await shelf.model.regenerateTitle(for: prompt.id)
         }
     }
 

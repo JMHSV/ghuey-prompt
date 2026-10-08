@@ -78,6 +78,26 @@ extension ShelfModel {
         actions.releaseFocus()
     }
 
+    /// Uses the latest saved body, even if the card that opened the menu is outdated.
+    func regenerateTitle(for id: Prompt.ID) async {
+        guard !generatingTitleIDs.contains(id) else { return }
+        guard let prompt = store.prompts.first(where: { $0.id == id }) else {
+            errorMessage = StoreError.notFound.localizedDescription
+            return
+        }
+        generatingTitleIDs.insert(id)
+        defer { generatingTitleIDs.remove(id) }
+        errorMessage = nil
+        do {
+            let title = try await generateTitle(prompt.body)
+            if try !store.applyGeneratedTitle(title, to: prompt) {
+                errorMessage = "The prompt changed while its title was being generated. Try again."
+            }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     func handleWhileEditing(_ command: Command) -> Bool {
         switch command {
         case .secondary: saveDraft()

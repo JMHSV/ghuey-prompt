@@ -77,6 +77,8 @@ final class ShelfModel {
     var isDiscardArmed = false
     var renamingID: Prompt.ID?
     var renameText = ""
+    var generatingTitleIDs: Set<Prompt.ID> = []
+    @ObservationIgnored let generateTitle: (String) async throws -> String
 
     // Deletion (see +Deletion)
     var recentlyDeleted: Deletion?
@@ -84,8 +86,9 @@ final class ShelfModel {
 
     var errorMessage: String?
 
-    init(store: PromptStore) {
+    init(store: PromptStore, generateTitle: @escaping (String) async throws -> String = TitleGenerator.title(for:)) {
         self.store = store
+        self.generateTitle = generateTitle
     }
 
     /// What the shelf lists. While browsing (no search) the order stays put until

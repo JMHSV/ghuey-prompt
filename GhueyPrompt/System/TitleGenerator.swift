@@ -1,5 +1,4 @@
 import Foundation
-import OSLog
 #if canImport(FoundationModels)
 import FoundationModels
 #endif
@@ -7,7 +6,17 @@ import FoundationModels
 /// Writes short titles for saved prompts with Apple's on-device model (macOS 26+,
 /// Apple Intelligence enabled). Private and offline; unavailable elsewhere.
 enum TitleGenerator {
-    private static let log = Logger(subsystem: "com.homesetv.GhueyPrompt", category: "titles")
+    enum GenerationError: LocalizedError {
+        case unavailable
+        case invalidResponse
+
+        var errorDescription: String? {
+            switch self {
+            case .unavailable: "Title generation requires macOS 26 or later with Apple Intelligence enabled."
+            case .invalidResponse: "Couldn't generate a title. Try again."
+            }
+        }
+    }
 
     static var isAvailable: Bool {
         #if canImport(FoundationModels)
@@ -16,24 +25,22 @@ enum TitleGenerator {
         return false
     }
 
-    /// Returns a 2–6 word title, or nil if the model is unavailable or fails.
-    static func title(for body: String) async -> String? {
+    /// Returns a short title, surfacing unavailability and generation failures.
+    static func title(for body: String) async throws -> String {
         #if canImport(FoundationModels)
-        guard #available(macOS 26, *), SystemLanguageModel.default.isAvailable else { return nil }
+        guard #available(macOS 26, *), SystemLanguageModel.default.isAvailable else {
+            throw GenerationError.unavailable
+        }
         let session = LanguageModelSession(instructions: """
             You name prompts that a person saved to reuse with AI assistants. \
             Reply with only a title of 2 to 6 words in Title Case that says what the prompt asks for. \
             No quotes, no trailing punctuation.
             """)
-        do {
-            let response = try await session.respond(to: "Prompt:\n\(body.prefix(2_000))")
-            return sanitize(response.content)
-        } catch {
-            log.error("Title generation failed: \(error.localizedDescription, privacy: .public)")
-            return nil
-        }
+        let response = try await session.respond(to: "Prompt:\n\(body.prefix(2_000))")
+        guard let title = sanitize(response.content) else { throw GenerationError.invalidResponse }
+        return title
         #else
-        return nil
+        throw GenerationError.unavailable
         #endif
     }
 

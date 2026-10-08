@@ -56,11 +56,16 @@ final class PromptStore {
         }
     }
 
-    /// Replaces an automatically derived title with a better one, unless the
-    /// user renamed the prompt in the meantime.
-    func applyGeneratedTitle(_ title: String, to id: Prompt.ID, replacing expected: String) throws {
-        guard prompts.first(where: { $0.id == id })?.title == expected else { return }
-        try modify(id) { $0.title = title }
+    /// Applies a title only if the saved title and body still match the generation input.
+    @discardableResult
+    func applyGeneratedTitle(_ title: String, to expected: Prompt) throws -> Bool {
+        guard let current = prompts.first(where: { $0.id == expected.id }),
+              current.title == expected.title, current.body == expected.body else { return false }
+        try modify(expected.id) { prompt in
+            prompt.title = title
+            prompt.updatedAt = .now
+        }
+        return true
     }
 
     func setFavorite(id: Prompt.ID, _ isFavorite: Bool) throws {

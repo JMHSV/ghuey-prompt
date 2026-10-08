@@ -14,6 +14,7 @@ struct PromptCard: View {
     private var terms: [String] { PromptSearch.terms(in: model.query) }
     private var isFlashed: Bool { model.flashedIDs.contains(prompt.id) }
     private var isRenaming: Bool { model.renamingID == prompt.id }
+    private var isGeneratingTitle: Bool { model.generatingTitleIDs.contains(prompt.id) }
     private var stackPosition: Int? { model.stackedIDs.firstIndex(of: prompt.id).map { $0 + 1 } }
 
     var body: some View {
@@ -94,6 +95,11 @@ struct PromptCard: View {
 
     @ViewBuilder
     private var accessories: some View {
+        if isGeneratingTitle {
+            ProgressView()
+                .controlSize(.mini)
+                .help("Generating title…")
+        }
         if isHovered {
             Image(systemName: "arrow.turn.down.left")
                 .font(.system(size: 10.5, weight: .semibold))
@@ -137,6 +143,10 @@ struct PromptCard: View {
         Divider()
         Button(prompt.isFavorite ? "Remove from Favorites" : "Add to Favorites") { model.toggleFavorite(prompt) }
         Button("Rename") { model.beginRenaming(prompt) }
+        Button(isGeneratingTitle ? "Generating Title…" : "Regenerate Title") {
+            Task { await model.regenerateTitle(for: prompt.id) }
+        }
+        .disabled(isGeneratingTitle)
         Button("Edit…") { model.beginEditing(prompt) }
         Divider()
         Button("Delete", role: .destructive) { model.delete(prompt) }
